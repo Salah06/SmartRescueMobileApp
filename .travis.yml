@@ -21,13 +21,13 @@ android:
 
     # Emulator for the tests
     - sys-img-armeabi-v7a-android-22
-cache:
-  directories:
-    - $HOME/.gradle/caches/2.14.1
-    - $HOME/.gradle/caches/jars-1
-    - $HOME/.gradle/daemon
-    - $HOME/.gradle/native
-    - $HOME/.gradle/wrapper
+#cache:
+#  directories:
+#    - $HOME/.gradle/caches/2.14.1
+#    - $HOME/.gradle/caches/jars-1
+#    - $HOME/.gradle/daemon
+#    - $HOME/.gradle/native
+#    - $HOME/.gradle/wrapper
 #before_script:
 #  - echo no | android create avd --force --name test --target $ANDROID_TARGET --abi $ANDROID_ABI
 #  - emulator -avd test -no-skin -no-audio -no-window &
