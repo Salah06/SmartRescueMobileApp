@@ -2,11 +2,6 @@ language: android
 jdk:
   - oraclejdk8
 
-addons:
-  apt:
-    packages:
-      - oracle-java8-installer
-
 android:
   components:
     - tools
