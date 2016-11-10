@@ -1,33 +1,39 @@
 language: android
+sudo: false
 jdk: oraclejdk8
 env:
+  matrix:
+    - ANDROID_TARGET=android-24 ANDROID_ABI=armeabi-v7a
   global:
-    - ANDROID_TARGET=android-24
+      # wait up to 10 minutes for adb to connect to emulator
+      - ADB_INSTALL_TIMEOUT=10
 android:
   components:
-    # Uncomment the lines below if you want to
-    # use the latest revision of Android SDK Tools
-    # - platform-tools
-    # - tools
-
-    # The BuildTools version used by your project
+    - platform-tools
+    - tools
     - build-tools-24.0.3
-
-    # The SDK version used to compile your project
     - android-24
 
     # Additional components
-    - extra-google-google_play_services
     - extra-google-m2repository
     - extra-android-m2repository
+    - extra-android-support
 
-    # Specify at least one system image,
-    # if you need to run emulator(s) during your tests
+    # Emulator for the tests
     - sys-img-armeabi-v7a-android-22
-    - sys-img-x86-android-17
-  licenses:
-    - 'android-sdk-preview-license-52d11cd2'
-    - 'android-sdk-license-.+'
-    - 'google-gdk-license-.+'
-  script:
-    - ./gradlew build assembleAndroidTest
+cache:
+  directories:
+    - $HOME/.gradle/caches/2.14.1
+    - $HOME/.gradle/caches/jars-1
+    - $HOME/.gradle/daemon
+    - $HOME/.gradle/native
+    - $HOME/.gradle/wrapper
+before_script:
+  - echo no | android create avd --force --name test --target $ANDROID_TARGET --abi $ANDROID_ABI
+  - emulator -avd test -no-skin -no-audio -no-window &
+script:
+  - ./gradlew check -PdisablePreDex --continue --stacktrace
+  - android-wait-for-emulator
+  - adb devices
+  - adb shell input keyevent 82 &
+  - ./gradlew connectedAndroidTest -PdisablePreDex --continue --stacktrace
