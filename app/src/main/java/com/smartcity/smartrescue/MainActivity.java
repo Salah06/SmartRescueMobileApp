@@ -12,6 +12,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
 
 import timber.log.Timber;
 
@@ -38,7 +39,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         gpsCoordView = (TextView) findViewById(R.id.gps_coord);
-        LocationService ls = LocationService.getLocationManager(this, VEHICULE_ID);
+        String token = FirebaseInstanceId.getInstance().getToken();
+        gpsCoordView.setText(token);
+        LocationService.getLocationManager(this, VEHICULE_ID);
     }
 
     @Override
