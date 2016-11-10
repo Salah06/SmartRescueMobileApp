@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "636045644218",
+    "firebase_url": "https://smartrescue-6e8ce.firebaseio.com",
+    "project_id": "smartrescue-6e8ce",
+    "storage_bucket": "smartrescue-6e8ce.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:636045644218:android:7b35d553399897b1",
+        "android_client_info": {
+          "package_name": "com.smartcity.smartrescue"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "636045644218-9ftq447rn6n6enhjhg6prvm0qqmqf9uf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdQ5KhmyTy_UmQeeFBQAQLFfXawaOAda0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
