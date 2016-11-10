@@ -1,11 +1,20 @@
 language: android
+jdk:
+  - oraclejdk8
+
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
+
 android:
   components:
-    - tools # to get the new `repository-11.xml`
-    - tools # see https://github.com/travis-ci/travis-ci/issues/6040#issuecomment-219367943)
-    - platform-tools
-    - android-24
+    - tools
+    - build-tools-23.0.2
+    - android-23
+    - extra-google-google_play_services
+    - extra-google-m2repository
     - extra-android-m2repository
-
+    
 script:
    - ./gradlew build connectedCheck
