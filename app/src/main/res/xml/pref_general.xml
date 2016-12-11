@@ -1,0 +1,20 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditTextPreference
+        android:inputType="text"
+        android:defaultValue=""
+        android:key="vehicule-id"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Vehicule-ID" />
+
+    <EditTextPreference
+        android:inputType="text"
+        android:defaultValue=""
+        android:key="mibandMAC"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Miband MAC" />
+
+</PreferenceScreen>

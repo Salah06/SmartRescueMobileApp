@@ -1,11 +1,18 @@
 package com.smartcity.smartrescue;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -16,23 +23,18 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.smartcity.smartrescue.settings.SettingsActivity;
 
-import java.io.IOException;
+import java.util.Set;
 
-import okhttp3.FormBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-import okhttp3.logging.HttpLoggingInterceptor;
 import timber.log.Timber;
 
+import static com.smartcity.smartrescue.settings.SettingsActivity.MIBAND_MAC_KEY;
+import static com.smartcity.smartrescue.settings.SettingsActivity.VEHICULE_ID_KEY;
+
 public class MainActivity extends AppCompatActivity {
-
-    public static final String VEHICULE_ID = "ambulance-1";
-
     DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference();
-    DatabaseReference locRef = dbRef.child(VEHICULE_ID);
+    DatabaseReference locRef;
 
     TextView gpsCoordView;
 
@@ -43,6 +45,26 @@ public class MainActivity extends AppCompatActivity {
             Timber.plant(new Timber.DebugTree());
         }
         setContentView(R.layout.activity_main);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        if (sp.getString(VEHICULE_ID_KEY, "").isEmpty()) {
+            startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+        }
+
+        Timber.d(sp.getString(MIBAND_MAC_KEY, ""));
+        if (sp.getString(MIBAND_MAC_KEY, "").isEmpty()) {
+            Timber.d("COCO");
+            String pairedMiband = getPairedMiBandMAC();
+            Timber.d(pairedMiband);
+            if (!pairedMiband.isEmpty()) {
+                sp.edit().putString(MIBAND_MAC_KEY, pairedMiband).apply();
+            }
+        }
+
+        String vehiculeId = sp.getString(VEHICULE_ID_KEY, "");
+        locRef = dbRef.child(vehiculeId);
 
         if (ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
             ActivityCompat.requestPermissions( this, new String[] {  android.Manifest.permission.ACCESS_COARSE_LOCATION  },
@@ -52,16 +74,57 @@ public class MainActivity extends AppCompatActivity {
         gpsCoordView = (TextView) findViewById(R.id.gps_coord);
         String token = FirebaseInstanceId.getInstance().getToken();
         gpsCoordView.setText(token);
-        Timber.d("Token %s", token);
-        LocationService.getLocationManager(this, VEHICULE_ID);
+//        Timber.d("Token %s", token);
+        LocationService.getLocationManager(this, vehiculeId);
 
         Button btn = (Button) findViewById(R.id.test_btn);
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new TestServer().execute();
+//                new TestServer().execute();
+                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private String getPairedMiBandMAC() {
+        String result = "";
+
+        if(BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+            final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            final Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+
+            for (BluetoothDevice pairedDevice : pairedDevices) {
+                if (pairedDevice != null && pairedDevice.getAddress() != null && pairedDevice.getName() != null && pairedDevice.getName().toLowerCase().contains("mi")) {
+                    result = pairedDevice.getAddress();
+                }
+            }
+        }
+
+        return result;
     }
 
     @Override
@@ -82,39 +145,5 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
-    }
-
-    private class TestServer extends AsyncTask {
-        @Override
-        protected Object doInBackground(Object[] params) {
-            String token = FirebaseInstanceId.getInstance().getToken();
-            Timber.d("Register token %s", token);
-
-            String url = "https://morning-beyond-41458.herokuapp.com/android";
-            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
-            OkHttpClient client = new OkHttpClient().newBuilder()
-                    .addInterceptor(logging)
-                    .build();
-
-            RequestBody body = new FormBody.Builder()
-                    .add("vehiculeId", MainActivity.VEHICULE_ID)
-                    .add("token", token)
-                    .build();
-
-            Request request = new Request.Builder()
-                    .url(url)
-                    .post(body)
-                    .build();
-            try {
-                Response response = client.newCall(request).execute();
-                Timber.d("Request token sent. %d", response.code());
-                response.close();
-            } catch (IOException e) {
-                Timber.e(e);
-            }
-
-            return true;
-        }
     }
 }

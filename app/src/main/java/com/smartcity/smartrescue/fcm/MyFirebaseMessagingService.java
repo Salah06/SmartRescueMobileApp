@@ -1,4 +1,4 @@
-package com.smartcity.smartrescue;
+package com.smartcity.smartrescue.fcm;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -7,6 +7,7 @@ import android.support.v4.app.NotificationCompat;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.smartcity.smartrescue.MainActivity;
 
 import timber.log.Timber;
 
