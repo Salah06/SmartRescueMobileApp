@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.Preference;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.smartcity.smartrescue.http.HttpClient;
@@ -36,7 +37,12 @@ public class PreferenceClickListener implements Preference.OnPreferenceClickList
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
             String vehiculeId = sp.getString(VEHICULE_ID_KEY, "");
 
-            return HttpClient.pushToken(vehiculeId, token);
+            if (HttpClient.pushToken(vehiculeId, token)) {
+                Toast.makeText(context, "Token pushed", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+
+            return false;
         }
     }
 }
