@@ -4,7 +4,7 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.util.ArrayMap;
+import android.support.v4.util.SimpleArrayMap;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
@@ -15,14 +15,12 @@ import com.smartcity.smartrescue.service.Command;
 import com.smartcity.smartrescue.service.MapCommand;
 import com.smartcity.smartrescue.service.SituationCommand;
 
-import java.util.Map;
-
 import timber.log.Timber;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public static final int NOTIFICATION_REQCODE = 0;
 
-    private static Map<String, Command> commands = new ArrayMap<>();
+    private static SimpleArrayMap<String, Command> commands = new SimpleArrayMap<>();
     static {
         commands.put(MapCommand.TRIGGER, new MapCommand());
         commands.put(SituationCommand.TRIGGER, new SituationCommand());
