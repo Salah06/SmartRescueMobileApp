@@ -38,9 +38,11 @@ public class PreferenceClickListener implements Preference.OnPreferenceClickList
             String vehiculeId = sp.getString(VEHICULE_ID_KEY, "");
 
             if (HttpClient.pushToken(vehiculeId, token)) {
+                Timber.d("TEST1");
                 Toast.makeText(context, "Token pushed", Toast.LENGTH_SHORT).show();
                 return true;
             }
+            Timber.d("TEST2");
 
             return false;
         }

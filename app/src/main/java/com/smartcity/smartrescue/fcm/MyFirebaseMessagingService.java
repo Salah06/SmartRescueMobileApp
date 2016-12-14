@@ -4,20 +4,54 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.util.ArrayMap;
 
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.smartcity.smartrescue.MainActivity;
+import com.smartcity.smartrescue.service.Command;
+import com.smartcity.smartrescue.service.MapCommand;
+import com.smartcity.smartrescue.service.SituationCommand;
+
+import java.util.Map;
 
 import timber.log.Timber;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
     public static final int NOTIFICATION_REQCODE = 0;
 
+    private static Map<String, Command> commands = new ArrayMap<>();
+    static {
+        commands.put(MapCommand.TRIGGER, new MapCommand());
+        commands.put(SituationCommand.TRIGGER, new SituationCommand());
+    }
+
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        showNotification(remoteMessage.getData().get("msg"));
+        String msg = remoteMessage.getData().get("msg");
+        showNotification(msg);
+
+        Timber.d(msg);
+        msg = "{\"command\":\"map\", \"data\": {\"address\":\"Valbonne\"}}";
+        JsonParser parser = new JsonParser();
+        JsonObject o = parser.parse(msg).getAsJsonObject();
+        String cmdStr = o.get("command").getAsString();
+        if (!cmdStr.isEmpty()) {
+            Command cmd = commands.get(cmdStr);
+            if (null != cmd) {
+                cmd.setContext(this);
+                try {
+                    JsonObject data = o.get("data").getAsJsonObject();
+                    Timber.d(data.get("address").getAsString());
+                    cmd.run(data);
+                } catch (Exception e) {
+                    Timber.e(e);
+                }
+            }
+        }
     }
 
     private void showNotification(String msg) {
