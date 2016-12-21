@@ -3,9 +3,7 @@ package com.smartcity.smartrescue.fcm;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
-import com.smartcity.smartrescue.MainActivity;
 
 import java.io.IOException;
 

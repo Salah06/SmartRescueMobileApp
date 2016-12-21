@@ -10,9 +10,10 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.smartcity.smartrescue.MainActivity;
+import com.smartcity.smartrescue.ui.MainActivity;
 import com.smartcity.smartrescue.service.Command;
 import com.smartcity.smartrescue.service.MapCommand;
+import com.smartcity.smartrescue.service.RequestCommand;
 import com.smartcity.smartrescue.service.SituationCommand;
 
 import timber.log.Timber;
@@ -22,6 +23,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     private static SimpleArrayMap<String, Command> commands = new SimpleArrayMap<>();
     static {
+        commands.put(RequestCommand.TRIGGER, new RequestCommand());
         commands.put(MapCommand.TRIGGER, new MapCommand());
         commands.put(SituationCommand.TRIGGER, new SituationCommand());
     }
@@ -33,7 +35,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         showNotification(msg);
 
         Timber.d(msg);
-        msg = "{\"command\":\"map\", \"data\": {\"address\":\"Valbonne\"}}";
+        //TODO Attendre server implem
+        msg = "{\"command\":\"request\", \"data\": {\"address\":\"Valbonne\"}}";
         JsonParser parser = new JsonParser();
         JsonObject o = parser.parse(msg).getAsJsonObject();
         String cmdStr = o.get("command").getAsString();
@@ -55,7 +58,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private void showNotification(String msg) {
         Intent i = new Intent(this, MainActivity.class);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pi = PendingIntent.getActivity(this, NOTIFICATION_REQCODE, i, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pi = PendingIntent.getActivity(this, NOTIFICATION_REQCODE, i,
+            PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
             .setAutoCancel(true)
             .setContentTitle(msg)

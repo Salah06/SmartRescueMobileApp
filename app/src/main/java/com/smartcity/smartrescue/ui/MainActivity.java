@@ -1,4 +1,4 @@
-package com.smartcity.smartrescue;
+package com.smartcity.smartrescue.ui;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -23,6 +23,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
+import com.smartcity.smartrescue.BuildConfig;
+import com.smartcity.smartrescue.LocationService;
+import com.smartcity.smartrescue.R;
 import com.smartcity.smartrescue.settings.SettingsActivity;
 
 import java.util.Set;
@@ -44,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
         }
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.ac_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 

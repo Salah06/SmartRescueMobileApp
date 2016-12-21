@@ -10,8 +10,8 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.smartcity.smartrescue.MainActivity"
-    tools:showIn="@layout/activity_main"
+    tools:context="com.smartcity.smartrescue.ui.MainActivity"
+    tools:showIn="@layout/ac_main"
     android:orientation="vertical">
 
     <TextView
