@@ -58,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
 
         Timber.d(sp.getString(MIBAND_MAC_KEY, ""));
         if (sp.getString(MIBAND_MAC_KEY, "").isEmpty()) {
-            Timber.d("COCO");
             String pairedMiband = getPairedMiBandMAC();
             Timber.d(pairedMiband);
             if (!pairedMiband.isEmpty()) {
@@ -67,6 +66,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         String vehiculeId = sp.getString(VEHICULE_ID_KEY, "");
+        if (vehiculeId.isEmpty()) {
+            throw new IllegalArgumentException("Vehicule ID is empty");
+        }
         locRef = dbRef.child(vehiculeId);
 
         if (ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
@@ -133,6 +135,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
+        locRef.child("token").setValue(FirebaseInstanceId.getInstance().getToken());
 
         locRef.addValueEventListener(new ValueEventListener() {
             @Override
