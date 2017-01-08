@@ -2,9 +2,8 @@ package com.smartcity.smartrescue.ui;
 
 import android.content.Intent;
 import android.net.Uri;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.Button;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
 
 import com.smartcity.smartrescue.R;
@@ -28,7 +27,6 @@ public class RequestActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ac_request);
-        Timber.d("ACTIVITY");
         ButterKnife.bind(this);
 
         String address = getIntent().getStringExtra(RequestCommand.EXTRA_ADDRESS);

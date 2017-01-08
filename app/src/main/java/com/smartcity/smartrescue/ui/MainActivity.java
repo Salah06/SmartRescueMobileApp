@@ -27,6 +27,8 @@ import com.smartcity.smartrescue.BuildConfig;
 import com.smartcity.smartrescue.LocationService;
 import com.smartcity.smartrescue.R;
 import com.smartcity.smartrescue.settings.SettingsActivity;
+import com.smartcity.smartrescue.vehicule.Status;
+import com.smartcity.smartrescue.vehicule.Vehicule;
 
 import java.util.Set;
 
@@ -52,18 +54,15 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        initVehicule(sp);
+//        Timber.d(Vehicule.getInstance().getVehiculeStatus().name());
+//        Vehicule.getInstance().changeVehiculeStatus(Status.ENROUTE);
+//        Timber.d(Vehicule.getInstance().getVehiculeStatus().name());
         if (sp.getString(VEHICULE_ID_KEY, "").isEmpty()) {
             startActivity(new Intent(MainActivity.this, SettingsActivity.class));
         }
 
-        Timber.d(sp.getString(MIBAND_MAC_KEY, ""));
-        if (sp.getString(MIBAND_MAC_KEY, "").isEmpty()) {
-            String pairedMiband = getPairedMiBandMAC();
-            Timber.d(pairedMiband);
-            if (!pairedMiband.isEmpty()) {
-                sp.edit().putString(MIBAND_MAC_KEY, pairedMiband).apply();
-            }
-        }
+        checkMibandAddress(sp);
 
         String vehiculeId = sp.getString(VEHICULE_ID_KEY, "");
         if (vehiculeId.isEmpty()) {
@@ -71,15 +70,11 @@ public class MainActivity extends AppCompatActivity {
         }
         locRef = dbRef.child(vehiculeId);
 
-        if (ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
-            ActivityCompat.requestPermissions( this, new String[] {  android.Manifest.permission.ACCESS_COARSE_LOCATION  },
-                    LocationService.MY_PERMISSION_ACCESS_COURSE_LOCATION );
-        }
+        checkLocationPermission();
 
         gpsCoordView = (TextView) findViewById(R.id.gps_coord);
         String token = FirebaseInstanceId.getInstance().getToken();
         gpsCoordView.setText(token);
-//        Timber.d("Token %s", token);
         LocationService.getLocationManager(this, vehiculeId);
 
         Button btn = (Button) findViewById(R.id.test_btn);
@@ -87,9 +82,31 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 //                new TestServer().execute();
-                startActivity(new Intent(MainActivity.this, SettingsActivity.class));
             }
         });
+    }
+
+    private void initVehicule(SharedPreferences sp) {
+        Vehicule.getInstance().setSharedPreferences(sp);
+        Vehicule.getInstance().changeVehiculeStatus(Status.PENDING);
+    }
+
+    private void checkMibandAddress(SharedPreferences sp) {
+        Timber.d(sp.getString(MIBAND_MAC_KEY, ""));
+        if (sp.getString(MIBAND_MAC_KEY, "").isEmpty()) {
+            String pairedMiband = getPairedMiBandMAC();
+            Timber.d(pairedMiband);
+            if (!pairedMiband.isEmpty()) {
+                sp.edit().putString(MIBAND_MAC_KEY, pairedMiband).commit();
+            }
+        }
+    }
+
+    private void checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission( this, android.Manifest.permission.ACCESS_COARSE_LOCATION ) != PackageManager.PERMISSION_GRANTED ) {
+            ActivityCompat.requestPermissions( this, new String[] {  android.Manifest.permission.ACCESS_COARSE_LOCATION  },
+                    LocationService.MY_PERMISSION_ACCESS_COURSE_LOCATION );
+        }
     }
 
     @Override
