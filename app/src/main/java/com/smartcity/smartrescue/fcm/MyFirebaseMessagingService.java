@@ -35,8 +35,8 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         showNotification(msg);
 
         Timber.d(msg);
-        //TODO Attendre server implem
-        msg = "{\"command\":\"request\", \"data\": {\"address\":\"Valbonne\"}}";
+//        //TODO Attendre server implem
+//        msg = "{\"command\":\"request\", \"data\": {\"address\":\"Valbonne\"}}";
         JsonParser parser = new JsonParser();
         JsonObject o = parser.parse(msg).getAsJsonObject();
         String cmdStr = o.get("command").getAsString();
