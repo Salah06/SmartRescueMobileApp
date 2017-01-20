@@ -9,6 +9,7 @@ public class Vehicule {
     {
         private final static Vehicule instance = new Vehicule();
         private static SharedPreferences sp;
+        private static Integer idEmergency;
     }
 
     public static Vehicule getInstance()
@@ -30,5 +31,13 @@ public class Vehicule {
 
     public void setSharedPreferences(SharedPreferences sp) {
         SingletonHolder.sp = sp;
+    }
+
+    public Integer getIdEmergency() {
+        return SingletonHolder.idEmergency;
+    }
+
+    public void setIdEmergency(Integer idEmergency) {
+        SingletonHolder.idEmergency = idEmergency;
     }
 }
