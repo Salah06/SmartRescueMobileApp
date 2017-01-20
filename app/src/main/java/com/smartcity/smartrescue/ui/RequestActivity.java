@@ -1,10 +1,14 @@
 package com.smartcity.smartrescue.ui;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.smartcity.smartrescue.R;
@@ -19,6 +23,7 @@ import butterknife.OnClick;
 import timber.log.Timber;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static com.smartcity.smartrescue.settings.SettingsActivity.VEHICULE_ID_KEY;
 
 public class RequestActivity extends AppCompatActivity {
 
@@ -41,9 +46,7 @@ public class RequestActivity extends AppCompatActivity {
 
     @OnClick(R.id.acceptBtn)
     public void acceptClick() {
-        String token = FirebaseInstanceId.getInstance().getToken();
-        Integer idEmergency = Vehicule.getInstance().getIdEmergency();
-        HttpClient.answerEmergency(idEmergency, token, "ok");
+        new OKAnswer().execute();
         Vehicule.getInstance().changeVehiculeStatus(Status.ENROUTE);
 
         Uri intentUri = Uri.parse("google.navigation:q="+address);
@@ -55,9 +58,27 @@ public class RequestActivity extends AppCompatActivity {
 
     @OnClick(R.id.denyBtn)
     public void denyClick() {
-        String token = FirebaseInstanceId.getInstance().getToken();
-        Integer idEmergency = Vehicule.getInstance().getIdEmergency();
-        HttpClient.answerEmergency(idEmergency, token, "ko");
+        new KOAnswer().execute();
         finish();
+    }
+
+    private class OKAnswer extends AsyncTask {
+        @Override
+        protected Object doInBackground(Object[] params) {
+            String token = FirebaseInstanceId.getInstance().getToken();
+            Integer idEmergency = Vehicule.getInstance().getIdEmergency();
+
+            return HttpClient.answerEmergency(idEmergency, token, "OK");
+        }
+    }
+
+    private class KOAnswer extends AsyncTask {
+        @Override
+        protected Object doInBackground(Object[] params) {
+            String token = FirebaseInstanceId.getInstance().getToken();
+            Integer idEmergency = Vehicule.getInstance().getIdEmergency();
+
+            return HttpClient.answerEmergency(idEmergency, token, "KO");
+        }
     }
 }

@@ -16,6 +16,8 @@ import com.smartcity.smartrescue.service.MapCommand;
 import com.smartcity.smartrescue.service.RequestCommand;
 import com.smartcity.smartrescue.service.SituationCommand;
 
+import java.util.Map;
+
 import timber.log.Timber;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
@@ -31,23 +33,21 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        String msg = remoteMessage.getData().get("msg");
-        showNotification(msg);
+        String command = remoteMessage.getData().get("command");
+        String data = remoteMessage.getData().get("data");
 
-        Timber.d(msg);
-//        //TODO Attendre server implem
-//        msg = "{\"command\":\"request\", \"data\": {\"address\":\"Valbonne\"}}";
+        showNotification(command, data);
+
+        Timber.d(command);
+        Timber.d(data);
         JsonParser parser = new JsonParser();
-        JsonObject o = parser.parse(msg).getAsJsonObject();
-        String cmdStr = o.get("command").getAsString();
-        if (!cmdStr.isEmpty()) {
-            Command cmd = commands.get(cmdStr);
+        JsonObject jsonData = parser.parse(data).getAsJsonObject();
+        if (!command.isEmpty()) {
+            Command cmd = commands.get(command);
             if (null != cmd) {
                 cmd.setContext(this);
                 try {
-                    JsonObject data = o.get("data").getAsJsonObject();
-                    Timber.d(data.get("address").getAsString());
-                    cmd.run(data);
+                    cmd.run(jsonData);
                 } catch (Exception e) {
                     Timber.e(e);
                 }
@@ -55,14 +55,14 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
     }
 
-    private void showNotification(String msg) {
+    private void showNotification(String title, String msg) {
         Intent i = new Intent(this, MainActivity.class);
         i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pi = PendingIntent.getActivity(this, NOTIFICATION_REQCODE, i,
             PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
             .setAutoCancel(true)
-            .setContentTitle(msg)
+            .setContentTitle(title)
             .setContentText(msg)
             .setSmallIcon(android.R.drawable.ic_menu_compass)
             .setContentIntent(pi);

@@ -21,8 +21,9 @@ public class RequestCommand implements Command {
     public void run(JsonObject data) {
         Timber.d("COMMAND");
         Status status = Vehicule.getInstance().getVehiculeStatus();
-        if (status != Status.PENDING) {
+        if (status == Status.PENDING) {
             String address = data.get("address").getAsString();
+            Timber.d(address);
             String idEmergency = data.get("idEmergency").getAsString();
             Vehicule.getInstance().setIdEmergency(Integer.valueOf(idEmergency));
             Intent i = new Intent(context, RequestActivity.class);
