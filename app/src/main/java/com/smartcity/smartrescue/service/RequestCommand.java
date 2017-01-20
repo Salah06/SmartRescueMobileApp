@@ -5,6 +5,7 @@ import android.content.Intent;
 
 import com.google.gson.JsonObject;
 import com.smartcity.smartrescue.ui.RequestActivity;
+import com.smartcity.smartrescue.vehicule.Status;
 import com.smartcity.smartrescue.vehicule.Vehicule;
 
 import timber.log.Timber;
@@ -18,15 +19,17 @@ public class RequestCommand implements Command {
 
     @Override
     public void run(JsonObject data) {
-        // TODO: if vehicule is available
         Timber.d("COMMAND");
-        String address = data.get("address").getAsString();
-        String idEmergency = data.get("idEmergency").getAsString();
-        Vehicule.getInstance().setIdEmergency(Integer.valueOf(idEmergency));
-        Intent i = new Intent(context, RequestActivity.class);
-        i.addFlags(FLAG_ACTIVITY_NEW_TASK);
-        i.putExtra(EXTRA_ADDRESS, address);
-        context.startActivity(i);
+        Status status = Vehicule.getInstance().getVehiculeStatus();
+        if (status != Status.PENDING) {
+            String address = data.get("address").getAsString();
+            String idEmergency = data.get("idEmergency").getAsString();
+            Vehicule.getInstance().setIdEmergency(Integer.valueOf(idEmergency));
+            Intent i = new Intent(context, RequestActivity.class);
+            i.addFlags(FLAG_ACTIVITY_NEW_TASK);
+            i.putExtra(EXTRA_ADDRESS, address);
+            context.startActivity(i);
+        }
     }
 
     @Override
