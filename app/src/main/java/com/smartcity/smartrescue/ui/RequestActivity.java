@@ -14,7 +14,6 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.smartcity.smartrescue.R;
 import com.smartcity.smartrescue.http.HttpClient;
 import com.smartcity.smartrescue.service.RequestCommand;
-import com.smartcity.smartrescue.vehicule.Status;
 import com.smartcity.smartrescue.vehicule.Vehicule;
 
 import butterknife.BindView;
@@ -23,10 +22,10 @@ import butterknife.OnClick;
 import timber.log.Timber;
 
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static com.smartcity.smartrescue.settings.SettingsActivity.VEHICULE_ID_KEY;
+import static com.smartcity.smartrescue.settings.SettingsActivity.SERVER_IP;
 
 public class RequestActivity extends AppCompatActivity {
-
+    private String serverEndpoint;
     private String address;
 
     @BindView(R.id.addressTv)
@@ -42,43 +41,67 @@ public class RequestActivity extends AppCompatActivity {
         this.address = address;
         Timber.d(address);
         addressTv.setText(address);
+
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        String serverIP = sp.getString(SERVER_IP, "");
+        serverEndpoint = "http://"+ serverIP + "/android";
     }
 
     @OnClick(R.id.acceptBtn)
     public void acceptClick() {
-        new OKAnswer().execute();
-        Vehicule.getInstance().changeVehiculeStatus(Status.ENROUTE);
-
-        Uri intentUri = Uri.parse("google.navigation:q="+address);
-        Intent i = new Intent(Intent.ACTION_VIEW, intentUri);
-        i.addFlags(FLAG_ACTIVITY_NEW_TASK);
-        i.setPackage("com.google.android.apps.maps");
-        startActivity(i);
+        Toast.makeText(this, "Accept click", Toast.LENGTH_SHORT).show();
+        new OKAnswer(serverEndpoint).execute();
     }
 
     @OnClick(R.id.denyBtn)
     public void denyClick() {
-        new KOAnswer().execute();
+        Toast.makeText(this, "Deny click", Toast.LENGTH_SHORT).show();
+        new KOAnswer(serverEndpoint).execute();
         finish();
     }
 
     private class OKAnswer extends AsyncTask {
+        private String serverEndpoint;
+
+        OKAnswer(String serverEndpoint) {
+            this.serverEndpoint = serverEndpoint;
+        }
+
         @Override
         protected Object doInBackground(Object[] params) {
             String token = FirebaseInstanceId.getInstance().getToken();
             Integer idEmergency = Vehicule.getInstance().getIdEmergency();
 
-            return HttpClient.answerEmergency(idEmergency, token, "OK");
+            boolean response;
+            do {
+                 response = HttpClient.answerEmergency(serverEndpoint, idEmergency, token, "OK");
+            } while (!response);
+
+            Vehicule.getInstance().changeVehiculeStatus(com.smartcity.smartrescue.vehicule.Status.ENROUTE);
+
+            Uri intentUri = Uri.parse("google.navigation:q="+address);
+            Intent i = new Intent(Intent.ACTION_VIEW, intentUri);
+            i.addFlags(FLAG_ACTIVITY_NEW_TASK);
+            i.setPackage("com.google.android.apps.maps");
+            startActivity(i);
+
+            return true;
         }
     }
 
     private class KOAnswer extends AsyncTask {
+        private String serverEndpoint;
+
+        KOAnswer(String serverEndpoint) {
+            this.serverEndpoint = serverEndpoint;
+        }
+
         @Override
         protected Object doInBackground(Object[] params) {
             String token = FirebaseInstanceId.getInstance().getToken();
             Integer idEmergency = Vehicule.getInstance().getIdEmergency();
 
-            return HttpClient.answerEmergency(idEmergency, token, "KO");
+            return HttpClient.answerEmergency(serverEndpoint, idEmergency, token, "KO");
         }
     }
 }

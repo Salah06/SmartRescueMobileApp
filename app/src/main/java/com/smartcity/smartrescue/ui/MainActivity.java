@@ -55,9 +55,6 @@ public class MainActivity extends AppCompatActivity {
 
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         initVehicule(sp);
-//        Timber.d(Vehicule.getInstance().getVehiculeStatus().name());
-//        Vehicule.getInstance().changeVehiculeStatus(Status.ENROUTE);
-//        Timber.d(Vehicule.getInstance().getVehiculeStatus().name());
         if (sp.getString(VEHICULE_ID_KEY, "").isEmpty()) {
             startActivity(new Intent(MainActivity.this, SettingsActivity.class));
         }

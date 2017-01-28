@@ -32,6 +32,7 @@ import java.util.List;
  */
 public class SettingsActivity extends AppCompatPreferenceActivity {
     public static final String VEHICULE_ID_KEY = "vehicule-id";
+    public static final String SERVER_IP = "server-ip";
     public static final String MIBAND_MAC_KEY = "mibandMAC";
 
     /**
@@ -63,6 +64,16 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             return true;
         }
     };
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == android.R.id.home) {
+            finish();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 
     /**
      * Helper method to determine if the device has an extra-large screen. For
@@ -135,8 +146,6 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected boolean isValidFragment(String fragmentName) {
         return PreferenceFragment.class.getName().equals(fragmentName)
                 || GeneralPreferenceFragment.class.getName().equals(fragmentName)
-//                || DataSyncPreferenceFragment.class.getName().equals(fragmentName)
-//                || NotificationPreferenceFragment.class.getName().equals(fragmentName)
                 || HelpPreferenceFragment.class.getName().equals(fragmentName);
     }
 
@@ -157,6 +166,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceSummaryToValue(findPreference(VEHICULE_ID_KEY));
+            bindPreferenceSummaryToValue(findPreference(SERVER_IP));
             bindPreferenceSummaryToValue(findPreference(MIBAND_MAC_KEY));
         }
 

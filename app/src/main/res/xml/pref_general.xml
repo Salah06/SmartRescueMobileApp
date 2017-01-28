@@ -11,6 +11,15 @@
     <EditTextPreference
         android:inputType="text"
         android:defaultValue=""
+        android:key="server-ip"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Server IP" />
+
+    <EditTextPreference
+        android:inputType="text"
+        android:defaultValue=""
         android:key="mibandMAC"
         android:maxLines="1"
         android:selectAllOnFocus="true"
