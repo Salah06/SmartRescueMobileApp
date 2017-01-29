@@ -1,10 +1,9 @@
 package com.smartcity.smartrescue.http;
 
-import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.FormBody;
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -24,30 +23,10 @@ public class HttpClient {
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BASIC);
         OkHttpClient client = new OkHttpClient().newBuilder()
-                .addInterceptor(logging)
-                .addInterceptor(new Interceptor() {
-                    @Override
-                    public Response intercept(Chain chain) throws IOException {
-                        Timber.d("RETRY INTERCEPTOR");
-                        Request request = chain.request();
-                        Response response = chain.proceed(request);
-                        try {
-                            int tryCount = 0;
-                            while (!response.isSuccessful() && tryCount < 50) {
-                                Timber.d("HTTPRequest retry : " + tryCount);
-                                ++tryCount;
-                                response = chain.proceed(request);
-                            }
-                        } catch (Exception e) {
-                            Timber.e(e);
-                        }
-
-                        return response;
-                    }
-                })
-                .writeTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
-                .readTimeout(SOCKET_TIMEOUT, TimeUnit.SECONDS)
-                .build();
+            .addInterceptor(logging)
+            .writeTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
+            .readTimeout(SOCKET_TIMEOUT, TimeUnit.SECONDS)
+            .build();
 
         RequestBody body = new FormBody.Builder()
                 .add("idEmergency", idEmergency.toString())
@@ -59,21 +38,26 @@ public class HttpClient {
                 .url(serverEndpoint)
                 .post(body)
                 .build();
-        try {
-            Response res = client.newCall(request).execute();
-            Timber.d("Answer emergency sent. %d", res.code());
-            res.close();
 
-            return true;
-        } catch (Exception e) {
-            Timber.e(e);
+        int count = 0;
+        int maxTries = 50;
+        while (true) {
+            try {
+                Response res = client.newCall(request).execute();
+                Timber.d("Answer emergency sent. %d", res.code());
+                res.close();
+
+                return true;
+            } catch (SocketTimeoutException e) {
+                if (++count == maxTries) {
+                    Timber.e(e);
+                    return false;
+                }
+            } catch (Exception e) {
+                Timber.e(e);
+                return false;
+            }
         }
-
-        return false;
-    }
-
-    private static String getServerEndpoint() {
-        return "http://192.168.0.14:1234/android";
     }
 
 //    private static class RetryInterceptor implements Interceptor {

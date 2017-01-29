@@ -1,7 +1,10 @@
 package com.smartcity.smartrescue.ui;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -25,6 +28,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static com.smartcity.smartrescue.settings.SettingsActivity.SERVER_IP;
 
 public class RequestActivity extends AppCompatActivity {
+    private Thread thread;
     private String serverEndpoint;
     private String address;
 
@@ -50,42 +54,89 @@ public class RequestActivity extends AppCompatActivity {
     @OnClick(R.id.acceptBtn)
     public void acceptClick() {
         Toast.makeText(this, "Accept click", Toast.LENGTH_SHORT).show();
-        new OKAnswer(serverEndpoint).execute();
+
+        while (!checkConnection()) {
+            thread = new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        synchronized (this) {
+                            wait(2000);
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            thread.start();
+        }
+
+        if (checkConnection()) {
+            new OKAnswer(serverEndpoint).execute();
+        }
     }
 
     @OnClick(R.id.denyBtn)
     public void denyClick() {
         Toast.makeText(this, "Deny click", Toast.LENGTH_SHORT).show();
-        new KOAnswer(serverEndpoint).execute();
-        finish();
+
+        while (!checkConnection()) {
+            thread = new Thread() {
+                @Override
+                public void run() {
+                    try {
+                        synchronized (this) {
+                            wait(2000);
+                        }
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+            thread.start();
+        }
+
+        if (checkConnection()) {
+            new KOAnswer(serverEndpoint).execute();
+            finish();
+        }
     }
 
-    private class OKAnswer extends AsyncTask {
+    private class OKAnswer extends AsyncTask<Boolean, Boolean, Boolean> {
         private String serverEndpoint;
 
         OKAnswer(String serverEndpoint) {
             this.serverEndpoint = serverEndpoint;
         }
 
+
         @Override
-        protected Object doInBackground(Object[] params) {
+        protected Boolean doInBackground(Boolean... params) {
             String token = FirebaseInstanceId.getInstance().getToken();
             Integer idEmergency = Vehicule.getInstance().getIdEmergency();
+            Timber.d(String.valueOf(idEmergency));
 
-            boolean response;
-            do {
-                 response = HttpClient.answerEmergency(serverEndpoint, idEmergency, token, "OK");
-            } while (!response);
+            boolean response = HttpClient.answerEmergency(serverEndpoint, idEmergency, token, "OK");
+            if (response) {
+                Vehicule.getInstance().changeVehiculeStatus(com.smartcity.smartrescue.vehicule.Status.ENROUTE);
 
-            Vehicule.getInstance().changeVehiculeStatus(com.smartcity.smartrescue.vehicule.Status.ENROUTE);
+                Uri intentUri = Uri.parse("google.navigation:q="+address);
+                Intent i = new Intent(Intent.ACTION_VIEW, intentUri);
+                i.addFlags(FLAG_ACTIVITY_NEW_TASK);
+                i.setPackage("com.google.android.apps.maps");
+                startActivity(i);
 
-            Uri intentUri = Uri.parse("google.navigation:q="+address);
-            Intent i = new Intent(Intent.ACTION_VIEW, intentUri);
-            i.addFlags(FLAG_ACTIVITY_NEW_TASK);
-            i.setPackage("com.google.android.apps.maps");
-            startActivity(i);
+                return true;
+            }
 
-            return true;
+            return false;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            if (!result) {
+                finish();
+            }
         }
     }
 
@@ -103,5 +154,15 @@ public class RequestActivity extends AppCompatActivity {
 
             return HttpClient.answerEmergency(serverEndpoint, idEmergency, token, "KO");
         }
+    }
+
+    private boolean checkConnection() {
+        ConnectivityManager cm =
+                (ConnectivityManager)getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
+
+        return activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
     }
 }
