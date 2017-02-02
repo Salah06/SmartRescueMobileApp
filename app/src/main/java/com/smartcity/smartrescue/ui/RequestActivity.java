@@ -31,6 +31,7 @@ public class RequestActivity extends AppCompatActivity {
     private Thread thread;
     private String serverEndpoint;
     private String address;
+    private boolean response = false;
 
     @BindView(R.id.addressTv)
     TextView addressTv;
@@ -44,6 +45,7 @@ public class RequestActivity extends AppCompatActivity {
         String address = getIntent().getStringExtra(RequestCommand.EXTRA_ADDRESS);
         this.address = address;
         address += Vehicule.getInstance().getVehiculeStatus();
+        address += Vehicule.getInstance().getIdEmergency();
         Timber.d(address);
         addressTv.setText(address);
 
@@ -55,6 +57,7 @@ public class RequestActivity extends AppCompatActivity {
     @OnClick(R.id.acceptBtn)
     public void acceptClick() {
         Toast.makeText(this, "Accept click", Toast.LENGTH_SHORT).show();
+        this.response = true;
 
         while (!checkConnection()) {
             thread = new Thread() {
@@ -80,6 +83,7 @@ public class RequestActivity extends AppCompatActivity {
     @OnClick(R.id.denyBtn)
     public void denyClick() {
         Toast.makeText(this, "Deny click", Toast.LENGTH_SHORT).show();
+        this.response = true;
 
         while (!checkConnection()) {
             thread = new Thread() {
@@ -165,5 +169,13 @@ public class RequestActivity extends AppCompatActivity {
 
         return activeNetwork != null &&
                 activeNetwork.isConnectedOrConnecting();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (response) {
+            finish();
+        }
     }
 }

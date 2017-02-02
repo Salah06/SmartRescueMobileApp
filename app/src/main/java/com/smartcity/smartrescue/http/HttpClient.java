@@ -40,7 +40,7 @@ public class HttpClient {
                 .build();
 
         int count = 0;
-        int maxTries = 50;
+        int maxTries = 5;
         while (true) {
             try {
                 Response res = client.newCall(request).execute();
