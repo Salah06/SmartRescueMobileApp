@@ -158,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
                 Double latitude = dataSnapshot.child("latitude").getValue(Double.class);
                 Double longitude = dataSnapshot.child("longitude").getValue(Double.class);
                 String text = "Latitude: "+ String.valueOf(latitude)+ ", Longitude: "+ String.valueOf(longitude);
+                text += Vehicule.getInstance().getVehiculeStatus();
                 gpsCoordView.setText(text);
             }
 

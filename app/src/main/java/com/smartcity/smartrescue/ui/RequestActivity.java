@@ -43,6 +43,7 @@ public class RequestActivity extends AppCompatActivity {
 
         String address = getIntent().getStringExtra(RequestCommand.EXTRA_ADDRESS);
         this.address = address;
+        address += Vehicule.getInstance().getVehiculeStatus();
         Timber.d(address);
         addressTv.setText(address);
 
