@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,9 +56,10 @@ public class RequestActivity extends AppCompatActivity {
     }
 
     @OnClick(R.id.acceptBtn)
-    public void acceptClick() {
+    public void acceptClick(Button btn) {
         Toast.makeText(this, "Accept click", Toast.LENGTH_SHORT).show();
         this.response = true;
+        btn.setEnabled(false);
 
         while (!checkConnection()) {
             thread = new Thread() {
@@ -81,9 +83,10 @@ public class RequestActivity extends AppCompatActivity {
     }
 
     @OnClick(R.id.denyBtn)
-    public void denyClick() {
+    public void denyClick(Button btn) {
         Toast.makeText(this, "Deny click", Toast.LENGTH_SHORT).show();
         this.response = true;
+        btn.setEnabled(false);
 
         while (!checkConnection()) {
             thread = new Thread() {
